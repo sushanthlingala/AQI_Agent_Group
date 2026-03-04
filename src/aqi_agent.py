@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import warnings
-warnings.filterwarnings("ignore", category=RuntimeWarning)
 
+warnings.filterwarnings("ignore", category=RuntimeWarning)
 
 def get_AQI_bucket(x):
     if x <= 50:
@@ -18,21 +18,17 @@ def get_AQI_bucket(x):
     else:
         return "Severe"
 
-
 def run_agent():
-
     df = pd.read_csv("../data/city_day.csv")
 
-    # pulling out each pollutant column separately for readability
     pm25 = df["PM2.5"]
     pm10 = df["PM10"]
-    so2  = df["SO2"]
-    nox  = df["NOx"]
-    nh3  = df["NH3"]
-    co   = df["CO"]
-    o3   = df["O3"]
+    so2 = df["SO2"]
+    nox = df["NOx"]
+    nh3 = df["NH3"]
+    co = df["CO"]
+    o3 = df["O3"]
 
-    # --- PM2.5 sub-index ---
     pm25_si = np.select(
         [pm25 <= 30, pm25 <= 60, pm25 <= 90, pm25 <= 120, pm25 <= 250, pm25 > 250],
         [
@@ -46,7 +42,6 @@ def run_agent():
         default=np.nan
     )
 
-    # --- PM10 sub-index ---
     pm10_si = np.select(
         [pm10 <= 50, pm10 <= 100, pm10 <= 250, pm10 <= 350, pm10 <= 430, pm10 > 430],
         [
@@ -60,7 +55,6 @@ def run_agent():
         default=np.nan
     )
 
-    # --- SO2 sub-index ---
     so2_si = np.select(
         [so2 <= 40, so2 <= 80, so2 <= 380, so2 <= 800, so2 <= 1600, so2 > 1600],
         [
@@ -74,7 +68,6 @@ def run_agent():
         default=np.nan
     )
 
-    # --- NOx sub-index ---
     nox_si = np.select(
         [nox <= 40, nox <= 80, nox <= 180, nox <= 280, nox <= 400, nox > 400],
         [
@@ -88,7 +81,6 @@ def run_agent():
         default=np.nan
     )
 
-    # --- NH3 sub-index ---
     nh3_si = np.select(
         [nh3 <= 200, nh3 <= 400, nh3 <= 800, nh3 <= 1200, nh3 <= 1800, nh3 > 1800],
         [
@@ -102,7 +94,6 @@ def run_agent():
         default=np.nan
     )
 
-    # --- CO sub-index ---
     co_si = np.select(
         [co <= 1, co <= 2, co <= 10, co <= 17, co <= 34, co > 34],
         [
@@ -116,7 +107,6 @@ def run_agent():
         default=np.nan
     )
 
-    # --- O3 sub-index ---
     o3_si = np.select(
         [o3 <= 50, o3 <= 100, o3 <= 168, o3 <= 208, o3 <= 748, o3 > 748],
         [
@@ -130,7 +120,6 @@ def run_agent():
         default=np.nan
     )
 
-    # stack all sub-indices and take the max across each row (that's how AQI works)
     subindices = np.vstack([pm25_si, pm10_si, so2_si, nox_si, nh3_si, co_si, o3_si])
     aqi = np.nanmax(subindices, axis=0)
 
@@ -138,7 +127,17 @@ def run_agent():
     df["AQI_Category"] = df["AQI_Calculated"].apply(get_AQI_bucket)
 
     result = df[["City", "Date", "AQI_Calculated", "AQI_Category"]]
-    print(result.groupby("City").first().reset_index())
+    table = result.groupby("City").first().reset_index()
 
+    print(table)
+
+    city_name = input("\nEnter city name: ")
+
+    city_data = table[table["City"].str.lower() == city_name.lower()]
+
+    if city_data.empty:
+        print("City not found")
+    else:
+        print(city_data)
 
 run_agent()
