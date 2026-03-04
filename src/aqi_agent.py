@@ -135,9 +135,11 @@ def run_agent():
 
     city_data = table[table["City"].str.lower() == city_name.lower()]
 
-    if city_data.empty:
-        print("City not found")
-    else:
-        print(city_data)
+    while city_data.empty:
+    	print("City not found. Enter a valid City name:\n")
+    	city_name = input("Enter city name: ")
+    	city_data = table[table["City"].str.lower() == city_name.lower()]
+
+    print(city_data)
 
 run_agent()
