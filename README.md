@@ -1,5 +1,4 @@
-# Q2 - AQI Agent
-
+# Q2 – AQI Agent
 An agent that calculated the Air Quality Index (AQI) for Indian cities using pollutant data from a dataset (talked about later).
 
 ---
